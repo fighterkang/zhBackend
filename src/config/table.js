@@ -197,4 +197,6 @@ export default {
   num: '阅读数',
   commentNum: '评论数',
   authorId: '发帖人ID',
+  credit: '学分',
+  pid: '父级id'
 }

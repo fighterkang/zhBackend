@@ -10,7 +10,9 @@ export const levelConfig = {
       'Apply',
       'Activity',
       'ForumLoop',
-      'ForumPost'
+      'ForumPost',
+      'ActivityLoop',
+      'UserList'
     ],
   },
 }
@@ -86,6 +88,22 @@ export const compositionConfig = [
     api: 'WeOpen.ConsultList',
     urlType: 'bbs',
     showList: ['id','consultName', 'consultImg', 'num', 'commentNum', 'authorId', 'nickName', 'photo', 'createTime'],
+    // add: 'AddForumPost',
+  },
+  {
+    name: 'ActivityLoop',
+    text: '活动轮播',
+    icon: '&#xe63e;',
+    api: 'manage/getShufflingAllTwo',
+    showList: ['id','title', 'activity', 'status', 'img'],
+    // add: 'AddForumPost',
+  },
+  {
+    name: 'UserList',
+    text: '用户列表',
+    icon: '&#xe63e;',
+    api: 'manage/getUserList',
+    showList: ['id','nickName', 'phone','level','credit', 'pid', 'sex', 'status'],
     // add: 'AddForumPost',
   },
 ]

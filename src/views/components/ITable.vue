@@ -457,6 +457,54 @@ export default {
             },
           },
         ],
+        ActivityLoop: [
+          {
+            text: '编辑',
+            event: () => {
+              this.$store.dispatch('slidemodel/show', { status: 'AddActivityLoop', params: info })
+            },
+          },
+          {
+            text: ['启用', '禁用'][info.status],
+            event: () => {
+              this.$store.dispatch('modelbox/show', {
+                status: 'comfirm',
+                config: {
+                  title: `${['启用', '禁用'][info.status]}轮播`,
+                  text: `确认要${['启用', '禁用'][info.status]}该轮播吗？`,
+                  fn: () => {
+                    this.$Helper.ajax({ url: 'manage/setShufflingTwo',params: { id: info.id, type: [3, 1][info.status] },method: 'POST'}).then(
+                      (response) => {
+                        this.$store.dispatch('toast/update', { type: 'success', content: `已${['启用', '禁用'][info.status]}`, time: 2000 })
+                        this.$store.dispatch('editerReload')
+                      }
+                    )
+                  },
+                }
+              })
+            },
+          },
+          {
+            text: '删除',
+            event: () => {
+              this.$store.dispatch('modelbox/show', {
+                status: 'comfirm',
+                config: {
+                  title: `删除轮播`,
+                  text: `确认要删除该轮播吗？`,
+                  fn: () => {
+                    this.$Helper.ajax({ url: 'manage/setShufflingTwo',params: { id: info.id, type: 2 },method: 'POST'}).then(
+                      (response) => {
+                        this.$store.dispatch('toast/update', { type: 'success', content: `已删除`, time: 2000 })
+                        this.$store.dispatch('editerReload')
+                      }
+                    )
+                  },
+                }
+              })
+            },
+          },
+        ],
       }
     },
     contextMenuOpen(e, key, info) {

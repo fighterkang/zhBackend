@@ -44,6 +44,13 @@
           <el-button type="primary" @click="addFn" v-if="addUrl" key="add">新增</el-button>
         </div>
       </div>
+      <div class="box h-table-top" v-if="$route.name==='UserList'">
+        <div class="box box-y-center box-x-right box-col-flex">
+          <el-input placeholder="请输入搜索内容" prefix-icon="el-icon-search" v-model="searchText" :on-icon-click="jsonSelect" @keyup.enter="jsonSelect">
+          </el-input>
+          <el-button type="primary" @click="addFn" v-if="addUrl" key="add">新增</el-button>
+        </div>
+      </div>
       <Itable :tableData="tableData" :showList="showList" :tableIn="tableIn" :showAction="false" :canCheck="false" :tableKey="topActive">
       </Itable>
       <div class="viod-status box box-x-center" v-if="tableData && tableData.length === 0">
@@ -237,14 +244,14 @@ export default {
     initTableData() {
       let params = {
         page: this.tableIn || 1,
-        find: ''
+        find: this.searchText || undefined
       }
       let method = 'GET'
       let urlType = this.topData.urlType || 'api'
       if (this.$route.name === 'Lesson') {
         params = { ...params, ...this.lesson, courseId: this.lesson.courseId === undefined ? -1 : this.lesson.courseId, findName: this.searchText }
         method = 'POST'
-      } else if (['User', 'Apply', 'Activity'].indexOf(this.$route.name) !== -1) {
+      } else if (['User', 'Apply', 'Activity', 'UserList'].indexOf(this.$route.name) !== -1) {
         method = 'POST'
       }
       this.$Helper.ajax({ url: this.beforeApi, params, method, urlType}).then(
@@ -307,7 +314,6 @@ export default {
       this.initTableData()
     },
     jsonSelect() {
-      console.log(this.searchText)
       this.startDate = null
       clearTimeout(this.jsonSelectSetTimer)
       this.jsonSelectSetTimer = setTimeout(() => {

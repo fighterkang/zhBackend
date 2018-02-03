@@ -4,23 +4,31 @@
   <div class="container">
     <div class="model-item box">
       <div class="h-label box box-item">名称</div>
-      <el-input v-model="basicData.courseClassName" type="text" placeholder="请填写分类名称"/>
+      <el-input v-model="basicData.title" type="text" placeholder="请填写项目名称"/>
     </div>
     <div class="model-item box">
-      <div class="h-label box box-item">置顶</div>
-      <el-input v-model="basicData.top" type="text" placeholder="请填写分类置顶级别，数字越大越靠前"/>
+      <div class="h-label box box-item">备注</div>
+      <el-input v-model="basicData.note" type="text" placeholder="请填写项目备注"/>
     </div>
     <div class="model-item box">
       <div class="h-label box box-item">类别</div>
-      <el-select v-model="basicData.status" placeholder="请选择">
-        <el-option v-for="(item, key) in [{key: 1, value: '正常分类'}, {key: 2, value: '特殊分类'}]" :key="item.key" :label="item.value" :value="item.key">
+      <el-select v-model="basicData.activity" placeholder="请选择">
+        <el-option v-for="item in selectArr" :key="item" :label="item" :value="item">
         </el-option>
       </el-select>
+    </div>
+    <div class="model-item box" v-if="basicData.activity!=='web'">
+      <div class="h-label box box-item">ID</div>
+      <el-input v-model="basicData.skipId" type="text" placeholder="请填写跳转课程ID"/>
+    </div>
+    <div class="model-item box" v-if="basicData.activity==='web'">
+      <div class="h-label box box-item">链接</div>
+      <el-input v-model="basicData.url" type="text" placeholder="请填写跳转链接"/>
     </div>
     <div class="model-item box">
       <div class="h-label box box-item">图片</div>
       <ul class="upload-ul box">
-        <li v-if="basicData.ico" :style="{backgroundImage: `url('${basicData.ico}')`}" @click="removeImage"/>
+        <li v-if="basicData.img" :style="{backgroundImage: `url('${basicData.img}')`}" @click="removeImage"/>
         <IUpload v-else @uploadSuccess="uploadSuccess">
           <li class="box box-item"><i class="iconfont">&#xe603;</i></li>
         </IUpload>
@@ -28,26 +36,27 @@
     </div>
     <div class="model-item box btn-container">
       <div class="h-label box box-item"></div>
-      <el-button style="margin-right:1vh;" @click="saveFn" :type="testParams.length===0 ? 'primary' : 'info'">确认</el-button>
+      <el-button style="margin-right:1vh;" @click="saveFn" type="primary">确认</el-button>
       <el-button @click="closeModel">取消</el-button>
     </div>
   </div>
 </template>
 <script>
 import IUpload from '@/views/components/IUpload'
-import md5 from 'js-md5'
 export default {
   components: {
     IUpload,
   },
   data() {
     return {
+      selectArr: ['web', 'course', 'activity'],
       basicData: {
-        courseClassName: null,
-        top: null,
-        ico: null,
-        status: 1,
-        pid: -1,
+        title: null,
+        note: null,
+        activity: null,
+        skipId: null,
+        url: null,
+        img: null,
       },
     }
   },
@@ -57,43 +66,28 @@ export default {
       default: {},
     },
   },
-  computed: {
-    testParams() {
-      return this.$Helper.testParamsComplete({ params: this.basicData, except: ['pid', 'twoClassJpas'] })
-    }
-  },
+  computed: {},
   watch: {
     params() {
-      this.assignData()
+      this.basicData = { ...this.basicData, ...this.params }
     },
   },
   methods: {
-    assignData() {
-      this.basicData = { ...this.basicData, ...this.params }
-    },
     closeModel() {
       this.$Helper.emitAction('closeModel')
     },
     saveFn() {
-      console.log(this.basicData)
-      if (this.testParams.length>0) {
-        this.$message({
-          type: 'error',
-          message: `缺少信息`
-        })
-        return
-      }
       this.$Helper
       .ajax({
-        url: `manage/course/updateCourseClass`,
+        url: `manage/updateShufflingTwo`,
         method: "POST",
-        params: { ...this.basicData },
+        params: this.basicData,
       })
       .then(
-        ({message}) => {
+        (data) => {
           this.$message({
             type: 'success',
-            message: message || '操作成功'
+            message: '操作成功'
           })
           this.closeModel()
           this.$store.dispatch('editerReload')
@@ -107,14 +101,14 @@ export default {
       );
     },
     removeImage() {
-      this.basicData.ico = null
+      this.basicData.img = null
     },
     uploadSuccess({url}) {
-      this.basicData.ico = url
+      this.basicData.img = url
     },
   },
   created() {
-    this.assignData()
+    this.basicData = { ...this.basicData, ...this.params }
   },
   mounted() {},
 }

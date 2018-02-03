@@ -8,6 +8,7 @@
       <PushMsg v-if="status==='PushMsg'" :params="basicData"/>
       <AddClass v-if="status==='AddClass'" :params="basicData"/>
       <AddFourmLoop v-if="status==='AddFourmLoop'" :params="basicData"/>
+      <AddActivityLoop v-if="status==='AddActivityLoop'" :params="basicData"/>
     </div>
     <div class="slideBottom-container layer" :class="{ active: status && type === 'slide-bottom' }">
       <ModifyPermission v-if="status==='ModifyPermission'" :params="basicData"/>
@@ -25,6 +26,7 @@ import ModifyPermission from "./child/ModifyPermission"
 import AddClass from "./child/AddClass"
 import AddFourmLoop from "./child/AddFourmLoop"
 import PostDetail from "./child/PostDetail"
+import AddActivityLoop from "./child/AddActivityLoop"
 import { mapState } from "vuex";
 export default {
   components: {
@@ -36,6 +38,7 @@ export default {
     AddClass,
     AddFourmLoop,
     PostDetail,
+    AddActivityLoop,
   },
   data() {
     return {
