@@ -198,5 +198,9 @@ export default {
   commentNum: '评论数',
   authorId: '发帖人ID',
   credit: '学分',
-  pid: '父级id'
+  pid: '父级id',
+  userid: '用户id',
+  question: '问题',
+  resolveType: '已解决',
+  responseType: '已回复',
 }

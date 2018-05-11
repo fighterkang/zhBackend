@@ -145,10 +145,7 @@ export default {
     // get comment list
     this.getCommentList()
     this.$Helper.onAction('addLike', key => {
-      this.$Helper.message.toast({
-        text: '已点赞',
-        long: 2000,
-      })
+      this.$message('已点赞')
       this.commentList.splice(key, 1, {
         ...this.commentList[key],
         haslike: 1,

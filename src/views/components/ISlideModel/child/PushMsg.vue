@@ -14,6 +14,17 @@
       <el-input v-model="basicData.userId" type="text" placeholder="请填写用户ID"/>
     </div>
     <div class="model-item box">
+      <div class="h-label box box-item">透传</div>
+      <el-select v-model="basicData.transmission.cmdId" placeholder="请选择">
+        <el-option v-for="item in [{key: '1', value: '普通消息'}, {key: '2', value: 'web'}, {key: '3', value: '课程'}, {key: '4', value: '活动'}]" :key="item.key" :label="item.value" :value="item.key">
+        </el-option>
+      </el-select>
+    </div>
+    <div class="model-item box" v-if="basicData.transmission.cmdId!=='1'">
+      <div class="h-label box box-item">{{ basicData.transmission.cmdId === '2' ? 'url' : 'id' }}</div>
+      <el-input v-model="basicData.transmission.body" type="text" :placeholder="`请填写${basicData.transmission.cmdId === '2' ? 'url' : 'id'}`"/>
+    </div>
+    <div class="model-item box">
       <div class="h-label box box-item">标题</div>
       <el-input v-model="basicData.msgTitle" type="text" placeholder="请填写标题"/>
     </div>
@@ -42,6 +53,10 @@ export default {
         userId: null,
         msgTitle: null,
         msgBody: null,
+        transmission: {
+          cmdId: '1',
+          body: null,
+        }
       },
     }
   },

@@ -3,36 +3,8 @@
 <template lang="html">
   <div class="container">
     <div class="model-item box">
-      <div class="h-label box box-item">名称</div>
-      <el-input v-model="basicData.title" type="text" placeholder="请填写项目名称"/>
-    </div>
-    <div class="model-item box">
-      <div class="h-label box box-item">备注</div>
-      <el-input v-model="basicData.note" type="text" placeholder="请填写项目备注"/>
-    </div>
-    <div class="model-item box">
-      <div class="h-label box box-item">类别</div>
-      <el-select v-model="basicData.activity" placeholder="请选择">
-        <el-option v-for="item in selectArr" :key="item" :label="item" :value="item">
-        </el-option>
-      </el-select>
-    </div>
-    <div class="model-item box" v-if="basicData.activity!=='web'">
-      <div class="h-label box box-item">ID</div>
-      <el-input v-model="basicData.skipId" type="text" placeholder="请填写跳转课程ID"/>
-    </div>
-    <div class="model-item box" v-if="basicData.activity==='web'">
-      <div class="h-label box box-item">链接</div>
-      <el-input v-model="basicData.url" type="text" placeholder="请填写跳转链接"/>
-    </div>
-    <div class="model-item box">
-      <div class="h-label box box-item">图片</div>
-      <ul class="upload-ul box">
-        <li v-if="basicData.img" :style="{backgroundImage: `url('${basicData.img}')`}" @click="removeImage"/>
-        <IUpload v-else @uploadSuccess="uploadSuccess">
-          <li class="box box-item"><i class="iconfont">&#xe603;</i></li>
-        </IUpload>
-      </ul>
+      <div class="h-label box box-item">置顶等级</div>
+      <el-input v-model="top" type="text" placeholder="请填写置顶等级"/>
     </div>
     <div class="model-item box btn-container">
       <div class="h-label box box-item"></div>
@@ -42,22 +14,12 @@
   </div>
 </template>
 <script>
-import IUpload from '@/views/components/IUpload'
 export default {
-  components: {
-    IUpload,
-  },
+  components: {},
   data() {
     return {
-      selectArr: ['web', 'course', 'activity'],
-      basicData: {
-        title: null,
-        note: null,
-        activity: null,
-        skipId: null,
-        url: null,
-        img: null,
-      },
+      basicData: {},
+      top: null,
     }
   },
   props: {
@@ -79,9 +41,12 @@ export default {
     saveFn() {
       this.$Helper
       .ajax({
-        url: `manage/updateShufflingTwo`,
-        method: "POST",
-        params: { ...this.basicData, createTime: undefined, updateTime: undefined },
+        url: `manage/course/updateCourseTop`,
+        method: "GET",
+        params: {
+          courseId: this.basicData.id,
+          top: this.top,
+        },
       })
       .then(
         (data) => {

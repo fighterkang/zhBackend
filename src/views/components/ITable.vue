@@ -6,7 +6,7 @@
       </li>
       <li class="box box-item box-col-flex" v-for="(item, key3) of showList" :key="key3" :data-type="item" :class="{account: item==='account'}">{{ getTableName(item) }}</li>
       <!-- <li class="box box-item box-col-flex" v-if="$route.name === 'adminList'" data-type="power">权限</li> -->
-      <li class="box box-item box-col-flex" v-if="showAction" style="width:50px;">操作</li>
+      <li class="box box-item box-col-flex" style="width:50px;" v-if="(actionArr && actionArr.length>0) || (getOpenMenuConfig()[tableKey] && getOpenMenuConfig()[tableKey].length>0)">操作</li>
     </ul>
     <ul v-for="(item,key) of tableData" :key="key" :tableKey="$route.name" class="h-table_ul h-table-td box" @click="clickTable(item)" @contextmenu.prevent="contextMenuOpen($event, key, item)"> 
       <li class="box box-item" style="width:50px;" @click.stop v-if="canCheck">
@@ -32,23 +32,16 @@
         </div>
         <p v-else>{{ getTableValue(item, single).value }}</p>
       </li>
-      <!-- <li class="box-col-flex td" v-if="$route.name === 'adminList'" data-type="power" @click.stop>
-        <el-checkbox v-model="item.role_reward">接受打赏</el-checkbox>
-        <el-checkbox v-model="item.role_exchange">交流中心操作权限</el-checkbox>
-        <el-checkbox v-model="item.role_match">游戏中心操作权限</el-checkbox>
-        <el-checkbox v-model="item.role_comment">评论操作权限</el-checkbox>
-        <el-checkbox v-model="item.role_matchpost">比赛中心发帖权限</el-checkbox>
-      </li> -->
-      <li class="box box-item box-col-flex" v-if="showAction" style="width:50px;">
+      <li class="box box-item box-col-flex" v-if="(actionArr && actionArr.length>0) || (getOpenMenuConfig(item)[tableKey] && getOpenMenuConfig(item)[tableKey].length>0)" style="width:50px;">
         <div class="box box-wrap">
           <div class="h-default-btn" data-type="premary" @click.stop="item3.fn(item)" v-for="(item3,key3) in actionArr" :key="key3">{{ item3.text }}</div>
+          <div class="h-default-btn" data-type="premary" @click.stop="item3.event()" v-for="(item3,key3) in getOpenMenuConfig(item)[tableKey]" :key="key3">{{ item3.text }}</div>
         </div>
       </li>
     </ul>
-    <context-menu id="contextMenu" ref="contextMenu">
-      <li>编辑</li>
-      <li class="disabled">编辑选中所有行</li>
-    </context-menu>
+    <div class="empty-status box box-item" :style="{height: `${emptyHeight || 50}vh`}" v-if="!tableData || tableData.length === 0">
+      <img src="static/img/empty.png" />
+    </div>
   </div>
 </template>
 
@@ -70,7 +63,7 @@ export default {
     }
   },
   props: [
-    'tableData', 'tableIn', 'singleCount', 'showList', 'tableIn', 'showAction', 'actionArr', 'tableKey'
+    'tableData', 'tableIn', 'singleCount', 'showList', 'tableIn', 'showAction', 'actionArr', 'tableKey', 'emptyHeight',
   ],
   computed: {
     ...mapState('basic', [
@@ -135,7 +128,7 @@ export default {
       this.$refs.table.toggleRowSelection(row, true)
       this.$refs.contextMenu.open(event, row)
     },
-    getOpenMenuConfig(info) {
+    getOpenMenuConfig(info = {}) {
       return {
         Loop: [
           {
@@ -186,6 +179,12 @@ export default {
           },
         ],
         Lesson: [
+          {
+            text: '置顶',
+            event: () => {
+              this.$store.dispatch('slidemodel/show', { status: 'updateCourseTop', params: info })
+            },
+          },
           {
             text: '删除',
             event: () => {
@@ -443,14 +442,14 @@ export default {
                 status: 'comfirm',
                 config: {
                   title: `删除轮播`,
-                  text: `确认要删除该轮播吗？`,
+                  text: `确认要删除该帖子吗？`,
                   fn: () => {
-                    // this.$Helper.ajax({ url: 'BackBanner.UpdateBanner', urlType: 'bbs',params: { id: info.id, status: 0 },method: 'GET'}).then(
-                    //   (response) => {
-                    //     this.$store.dispatch('toast/update', { type: 'success', content: `已删除`, time: 2000 })
-                    //     this.$store.dispatch('editerReload')
-                    //   }
-                    // )
+                    this.$Helper.ajax({ url: 'manage/deleteConsult', urlType: 'api',params: { id: info.id },method: 'GET'}).then(
+                      (response) => {
+                        this.$store.dispatch('toast/update', { type: 'success', content: `已删除`, time: 2000 })
+                        this.$store.dispatch('editerReload')
+                      }
+                    )
                   },
                 }
               })
@@ -496,6 +495,56 @@ export default {
                     this.$Helper.ajax({ url: 'manage/setShufflingTwo',params: { id: info.id, type: 2 },method: 'POST'}).then(
                       (response) => {
                         this.$store.dispatch('toast/update', { type: 'success', content: `已删除`, time: 2000 })
+                        this.$store.dispatch('editerReload')
+                      }
+                    )
+                  },
+                }
+              })
+            },
+          },
+        ],
+        HelpList: [
+          {
+            text: '处理',
+            event: () => {
+              if (info.resolveType===1) {
+                this.$message('该反馈已处理，请勿重复处理')
+                return
+              }
+              this.$store.dispatch('modelbox/show', {
+                status: 'comfirm',
+                config: {
+                  title: `处理反馈`,
+                  text: `确认要处理该反馈吗？`,
+                  fn: () => {
+                    this.$Helper.ajax({ url: `manage/solveqs?id=${info.id}`,params: {},method: 'POST'}).then(
+                      ({message}) => {
+                        this.$store.dispatch('toast/update', { type: 'success', content: message || `已处理`, time: 2000 })
+                        this.$store.dispatch('editerReload')
+                      }
+                    )
+                  },
+                }
+              })
+            },
+          },
+          {
+            text: '回复',
+            event: () => {
+              if (info.responseType===2) {
+                this.$message('该反馈已回复')
+                return
+              }
+              this.$store.dispatch('modelbox/show', {
+                status: 'comfirm',
+                config: {
+                  title: `回复反馈`,
+                  text: `确认要回复该反馈吗？`,
+                  fn: () => {
+                    this.$Helper.ajax({ url: `manage/respqs?id=${info.id}`,params: {},method: 'POST'}).then(
+                      ({message}) => {
+                        this.$store.dispatch('toast/update', { type: 'success', content: message || `已回复`, time: 2000 })
                         this.$store.dispatch('editerReload')
                       }
                     )
@@ -584,6 +633,18 @@ export default {
         type = 'tag'
         status = typeConfig[value]
         value = statusConfig[value]
+      } else if (['responseType'].indexOf(single)!==-1) {
+        let statusConfig = ['', '否', '是']
+        let typeConfig = ['', 'error', 'primary']
+        type = 'tag'
+        status = typeConfig[value]
+        value = statusConfig[value]
+      } else if (['resolveType'].indexOf(single)!==-1) {
+        let statusConfig = ['', '是', '否']
+        let typeConfig = ['', 'primary', 'error']
+        type = 'tag'
+        status = typeConfig[value]
+        value = statusConfig[value]
       } else if (['twoClass'].indexOf(single)!==-1) {
         type = 'tag'
         status = 'info'
@@ -662,6 +723,12 @@ export default {
     // border: 1px solid black;
     height: 7vh;
     // color: #666;
+  }
+}
+
+.empty-status{
+  img{
+    width: 8vw;
   }
 }
 

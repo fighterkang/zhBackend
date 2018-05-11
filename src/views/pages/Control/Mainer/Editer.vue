@@ -41,7 +41,7 @@
         <div class="box box-y-center box-x-right box-col-flex">
           <el-input placeholder="请输入搜索内容" prefix-icon="el-icon-search" v-model="searchText" :on-icon-click="jsonSelect" @keyup.enter="jsonSelect">
           </el-input>
-          <el-button type="primary" @click="addFn" v-if="addUrl" key="add">新增</el-button>
+          <el-button type="primary" @click="refresh" key="add" style="margin-left:2vw;">重置</el-button>
         </div>
       </div>
       <div class="box h-table-top" v-if="$route.name==='UserList'">
@@ -51,11 +51,21 @@
           <el-button type="primary" @click="addFn" v-if="addUrl" key="add">新增</el-button>
         </div>
       </div>
-      <Itable :tableData="tableData" :showList="showList" :tableIn="tableIn" :showAction="false" :canCheck="false" :tableKey="topActive">
-      </Itable>
-      <div class="viod-status box box-x-center" v-if="tableData && tableData.length === 0">
-        暂无任何数据！
+      <div class="box h-table-top" v-if="$route.name==='HelpList'">
+        <div class="box h-item">
+          <div class="h-label box box-item">是否处理</div>
+          <el-select v-model="helpHasHandler" placeholder="请选择" @change="lessonNewesChangeFn">
+            <el-option v-for="item in [{key: 1, value: '已处理'}, {key: 2, value: '未处理'}]" :key="item.key" :label="item.value" :value="item.key">
+            </el-option>
+          </el-select>
+        </div>
+        <div class="box box-y-center box-x-right box-col-flex">
+          <el-input placeholder="请输入搜索内容" prefix-icon="el-icon-search" v-model="searchText" :on-icon-click="jsonSelect" @keyup.enter="jsonSelect">
+          </el-input>
+        </div>
       </div>
+      <Itable :tableData="tableData" :showList="showList" :tableIn="tableIn" :showAction="false" :canCheck="false" :tableKey="topActive" :emptyHeight="80">
+      </Itable>
     </div>
     <el-pagination :current-page.sync="tableIn" :page-size="10" layout="prev, pager, next" :total="tablePageTotal">
     </el-pagination>
@@ -141,6 +151,7 @@ export default {
         courseId: undefined,
       },
       lesson: {},
+      helpHasHandler: 2,
     }
   },
   computed: {
@@ -225,6 +236,11 @@ export default {
     }
   },
   methods: {
+    refresh() {
+      this.lesson = _.cloneDeep(this.lessonSave)
+      this.searchText = null
+      this.initTableData()
+    },
     lessonClassIdChangeFn(item) {
       this.lesson = { ...this.lessonSave, oneClassId: this.lesson.oneClassId, courseId: item }
       this.initTableData()
@@ -253,11 +269,13 @@ export default {
         method = 'POST'
       } else if (['User', 'Apply', 'Activity', 'UserList'].indexOf(this.$route.name) !== -1) {
         method = 'POST'
+      } else if (this.$route.name === 'HelpList') {
+        method = 'POST'
+        params = { ...params, type: this.helpHasHandler }
       }
       this.$Helper.ajax({ url: this.beforeApi, params, method, urlType}).then(
         ({ total, data, pageSize, pageNum }) => {
-          this.tablePageTotal = total || 1
-          this.pageIn = pageNum
+          this.tablePageTotal = total * 10 || 10
           if (urlType === 'bbs') {
             this.tableData = data.data
           } else {
@@ -271,7 +289,7 @@ export default {
       )
     },
     resetTableData() {
-      this.tablePageTotal = 1
+      this.tablePageTotal = 10
       this.tableData = []
       this.pageIn = 1
       this.scrollTop()

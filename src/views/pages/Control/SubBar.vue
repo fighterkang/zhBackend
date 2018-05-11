@@ -2,33 +2,29 @@
   <div class="container" :class="{close: subBarClose}">
     <div class="content">
       <div class="container-head box box-item">
-        {{ subBarClose? 'ZH' : 'ZhBackend' }}
+        {{ subBarClose? '显百' : '显百管理后台' }}
       </div>
       <div class="toggleBar box box-item cursor" @click="toggleSubBarClose">
         <i class="iconfont" :class="{ active: !subBarClose }">&#xe623;</i>
       </div>
-      <div class="s-subbar" @mouseover.stop="showTooltip($event, true)" @mouseout.stop="showTooltip($event, false)">
-        <li class="s-li s-item box box-y-center" v-for="(item, key) of compositionConfig" v-if="!item.sub || item.sub.length===0" :key="key" :tooltip="item.text" @click="pushRoute(item.name)" :class="{active: $route.name === item.name}">
-          <i class="iconfont no-touch" v-html="item.icon"/>
-          {{ item.text }}
-        </li>
-        <ul class="s-ul" v-for="(item, key) of compositionConfig" v-if="item.sub && item.sub.length>0" :key="key">
+      <div class="s-subbar" ref="scroll_con">
+        <ul class="s-ul" v-for="(item, key) of compositionConfig" :key="key">
           <li class="s-head s-li box box-y-center" @click="toggleSubItemActive(item, key)" v-if="!subBarClose">
             <i class="iconfont" v-html="item.icon" :class="{ active: item.active }"/>
-            {{ item.text }}
+            {{ item.name }}
           </li>
-          <ul class="s-list" :class="{ active: subBarClose || item.active }">
-            <li class="s-li s-item box box-y-center" v-for="(item2, key2) of item.sub" :key="key2" :tooltip="item2.text" @click="pushRoute(item2.name)" :class="{active: $route.name === item2.name}">
+          <ul class="s-list" :class="{ active: subBarClose || item.active }" @mouseover.stop="showTooltip($event, true)" @mouseout.stop="showTooltip($event, false)">
+            <li class="s-li s-item box box-y-center" v-for="(item2, key2) of item.sub" :key="key2" :tooltip="item2.text" @click="pushRoute(item2)" :class="{active: $route.name === item2.name}">
               <i class="iconfont no-touch" v-html="item2.icon"/>
               {{ item2.text }}
             </li>
           </ul>
         </ul>
       </div>
-      <div class="h_menu-bottom" v-if="!subBarClose">
+      <!-- <div class="h_menu-bottom" v-if="!subBarClose">
         <div class="box box-item" v-html="systemDate"></div>
         <div class="box box-item" v-html="systemTime"></div>
-      </div>
+      </div> -->
     </div>
     <div class="tooltip box box-item" :style="{top: tooltipTop + 'px'}">{{ tooltipText }}</div>
   </div>
@@ -46,7 +42,7 @@ export default {
   },
   data() {
     return {
-      saveCache: false,
+      saveCache: true,
       subData: [],
       activeItem: null,
       systemDate: null,
@@ -59,19 +55,18 @@ export default {
   },
   created(to, from, next) {
     this.getTime();
-    this.judgeAuthority();
-    this.initComposition();
+    this.judgeAuthority()
   },
   computed: {
     ...mapState("basic", ["basic"]),
     authority() {
-      let role = _.get(this.basic, "level");
-      return role && levelConfig[role] ? levelConfig[role].subBar : [];
+      let level = _.get(this.basic, "level");
+      return level && levelConfig[level] ? levelConfig[level].subBar : [];
     }
   },
   watch: {
     $route() {
-      this.judgeAuthority();
+      this.judgeAuthority()
     }
   },
   methods: {
@@ -82,8 +77,9 @@ export default {
     },
     showTooltip(e, show) {
       if (this.subBarClose && e.target.className.indexOf('s-item') !== -1) {
+        let scrollTop = this.$refs.scroll_con.scrollTop || 0
         this.tooltipText = show ? e.target.innerText.substr(2) : ''
-        this.tooltipTop = show ? e.target.offsetTop : -1000
+        this.tooltipTop = show ? e.target.offsetTop - scrollTop : -1000
       }
     },
     toggleSubBarClose() {
@@ -103,12 +99,12 @@ export default {
         if (sub && this.$Helper.isArray(sub)) {
           sub.map((item2, key2) => {
             if(this.authority.indexOf(item2.name) === -1) {   // 不在权限范围内，移除
-              sub.splice(key2, 1, {})
+              sub.splice(key2, 1)
             }
           })
         } else {
           if(this.authority.indexOf(name) === -1) {   // 不在权限范围内，移除
-            compositionConfig.splice(key, 1, {})
+            compositionConfig.splice(key, 1)
           }
         }
       })
@@ -116,17 +112,22 @@ export default {
       this.saveCache && this.$Helper.setCookie('compositionConfig', compositionConfig)
       this.compositionConfig = compositionConfig
     },
-    pushRoute(name) {
+    pushRoute({ name, openType }) {
+      if (name === 'About') {
+        this.$store.dispatch('bottommodel/show', { status: 'About' })
+        return
+      }
       this.$Helper.pushRoute(name);
     },
     judgeAuthority() {
+      let basicCookie = JSON.parse(this.$Helper.getCookie('basic') || '{}')
       if (!this.authority) {
-        router.push({ name: "Login" });
-        return;
+        this.$message('登录信息有误，请重新登录...')
+        setTimeout(() => router.push({ name: "Login" }), 600)
+      } else {
+        this.$store.dispatch('basic/setLoginData',basicCookie)
+        this.initComposition()
       }
-      // if (this.authority.indexOf(this.$route.name) === -1) {
-      //   router.push({ name: this.authority[0] })
-      // }
     },
     getTime() {
       this.systemDate = this.getSystemDate();
@@ -178,16 +179,14 @@ export default {
       return `星期${weekDay} &nbsp;&nbsp;${hour} : ${minutes}`;
     }
   }
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less" scoped>
 .container {
   width: 11vw;
-  min-width: 150px;
-  max-width: 200px;
-  background: #333744;
+  background: #02223f;
   color: #fff;
   position: relative;
   transition: all 200ms linear 0s;
@@ -198,9 +197,6 @@ export default {
       .container-head{
         font-size: 2.2vh;
       }
-      .s-subbar {
-        height: calc(~"88vh - 30px");
-      }
     }
   }
   .tooltip{
@@ -208,7 +204,7 @@ export default {
     top:-100vh;
     left:3.8vw;
     // width:20vw;
-    background: rgba(91,97,114,0.9);
+    background: #000c17;
     color:#fff;
     height:5.5vh;
     padding:0 1vw;
@@ -225,7 +221,7 @@ export default {
       left:-0.3vw;
       width:0;
       height:0;
-      border-right:0.3vw solid rgba(91,97,114,0.9);
+      border-right:0.3vw solid #000c17;
       border-top:0.3vw solid transparent;
       border-bottom:0.3vw solid transparent;
       // border-left:0.3vw solid transparent;
@@ -236,7 +232,7 @@ export default {
     height: 100vh;
     .toggleBar{
       height:30px;
-      background: #4b5163;
+      background: #011528;
       i{
         font-size: 1.6vh;
         color:#8e97a2;
@@ -250,56 +246,60 @@ export default {
       &::-webkit-scrollbar{display: none}
       overflow-x: hidden;
       overflow-y: auto;
-      height: calc(~"88vh - 100px");
+      height: calc(~"93.5vh - 30px");
       width:11vw;
       min-width: 150px;
-      .s-li {
+      .s-ul {
         cursor: pointer;
-        height: 5.5vh;
-        background: #333744;
-        font-size: 1.6vh;
-        padding: 0 1.2vw;
-        letter-spacing: 1px;
-        transition: all 300ms ease-in-out 0s;
-        i {
-          font-size: 2vh;
-          margin-right: 1.2vw;
-          color: #aeb9c1;
-        }
-        &:hover {
-          background: #4b5163;
-        }
-        &.active{
-          background: #409EFF;
-          i{
-            color: white;
+        .s-li {
+          height: 5.5vh;
+          background: #000c17;
+          color: #fff;
+          font-size: 1.6vh;
+          padding: 0 1.2vw;
+          letter-spacing: 1px;
+          transition: all 300ms ease-in-out 0s;
+          i {
+            font-size: 2vh;
+            margin-right: 1.2vw;
+            color: #aeb9c1;
+          }
+          &:hover {
+            // background: #4b5163;
+          }
+          &.active{
+            // background: #2ca2fc;
+            color: #3da6f6;
+            i{
+              color: #3da6f6;
+            }
           }
         }
-      }
-      .s-head {
-        font-size: 1.7vh;
-        font-weight: 500;
-        background: #43495b;
-        i {
-          font-size: 1.6vh;
-          margin-right: 1.2vw;
-          margin-left:0.1vw;
-          color: white;
+        .s-head {
+          font-size: 1.7vh;
+          font-weight: 500;
+          background: #011528;
+          i {
+            font-size: 1.6vh;
+            margin-right: 1.2vw;
+            margin-left:0.1vw;
+            color: white;
+            transition: all 300ms ease-in-out 0s;
+            &.active{
+              transform: rotate(90deg);
+            }
+          }
+          // &:hover {
+          //   background: #2ca2fc;
+          // }
+        }
+        .s-list {
+          overflow: hidden;
+          max-height:0;
           transition: all 300ms ease-in-out 0s;
           &.active{
-            transform: rotate(90deg);
+            max-height: 1000px;
           }
-        }
-        // &:hover {
-        //   background: #409EFF;
-        // }
-      }
-      .s-list {
-        overflow: hidden;
-        max-height:0;
-        transition: all 300ms ease-in-out 0s;
-        &.active{
-          max-height: 1000px;
         }
       }
     }
@@ -308,7 +308,7 @@ export default {
       font-weight: 600;
       color: white;
       // background: #161d20;
-      height: 60px;
+      height: 6.5vh;
       font-style: italic;
       text-shadow: 0 0 1px #333;
     }

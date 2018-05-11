@@ -83,7 +83,7 @@ export default {
 .topbar-container {
   background: white;
   z-index: 10;
-  height: 60px;
+  height: 6.5vh;
   position: relative;
   transition: none!important;
   .btn-content{
@@ -91,7 +91,7 @@ export default {
     padding:0 20px;
   }
   .half-x-line{
-    background: #666;
+    background: #ccc;
     position: absolute;
     bottom: 0;
     left:0;
@@ -114,12 +114,13 @@ export default {
       li{
         height: 100%;
         padding:0 1.7vw;
-        font-size: 1.1vw;
+        font-size: 1vw;
         border-left: 1px solid #eee;
         color: #666;
+        font-weight: 500;
         cursor: pointer;
         i{
-          font-size: 1.5vw;
+          font-size: 1.2vw;
           margin-right: 3px;
         }
       }

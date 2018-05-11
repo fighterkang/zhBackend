@@ -45,7 +45,7 @@ export default {
   transition: all 0.1s linear;
   left: 0;
   right: 0;
-  top: 60px;
+  top: 6.5vh;
   bottom:0;
 }
 

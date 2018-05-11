@@ -3,7 +3,7 @@
     <transition name="fade">
       <div class="layer no-touch" v-show="active"></div>
     </transition>
-    <div class="box box-item" id="Itoast" :class="{active:active}" :data-type="type">
+    <div class="box box-item no-touch" id="Itoast" :class="{active:active}" :data-type="type">
       <div class="box box-item Itosat-container">
         <i class="iconfont" data-type="success">&#xe6f3;</i>
         <i class="iconfont" data-type="error">&#xe641;</i>

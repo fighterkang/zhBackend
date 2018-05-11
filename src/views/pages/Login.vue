@@ -56,7 +56,7 @@ export default {
     // 清除token
     this.$Helper.clearCookie()
     if(process.env.NODE_ENV === 'development') {
-      this.userName = '13113656554'
+      this.userName = '13319512211'
       this.passWord = '123456'
     }
     // console.log(md5('123456'))

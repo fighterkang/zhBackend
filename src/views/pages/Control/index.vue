@@ -23,17 +23,17 @@ export default {
 
   },
   methods: {
-    testLogin() {
-      let basicCookie = JSON.parse(this.$Helper.getCookie('basic'))
-      if (!basicCookie) {
-        router.push({name:'Login'})
-      } else {
-        this.$store.dispatch('basic/setLoginData',basicCookie)
-      }
-    },
+    // testLogin() {
+    //   let basicCookie = JSON.parse(this.$Helper.getCookie('basic'))
+    //   if (!basicCookie) {
+    //     router.push({name:'Login'})
+    //   } else {
+    //     this.$store.dispatch('basic/setLoginData',basicCookie)
+    //   }
+    // },
   },
   created() {
-    this.testLogin()
+    // this.testLogin()
   },
 }
 </script>

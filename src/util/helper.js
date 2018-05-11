@@ -23,89 +23,69 @@ const Helper = {
     }
     return newData
   },
+  fetch(params) {
+    return Helper.ajax(params)
+  },
   ajax({ params = {}, method = 'POST', url, urlType = 'api' }) {
-    if (!url) throw new Error('Ajax error,without url!')
-    let basicCookie = Helper.getCookie('basic')
-    let accesstoken = _.get(!basicCookie ? {} : JSON.parse(basicCookie), 'token')
-    params = method === 'GET' && accesstoken ? Object.assign(params, { accesstoken }) : params
-    url = apiConfig[urlType] + url
-    return new Promise((resolve, reject) => {
-      THIS.$http(
-        {
-          method,
-          url,
-          params: method === 'GET' ? params : { accesstoken },
-          body: method === 'POST' ? JSON.stringify(params) : {},
-          // headers: {
-          //   'Content-Type': 'application/json',
-          // },
-        }
-      ).then(
-        ({ bodyText = '{}' }) => {
-          let data = JSON.parse(bodyText)
-          if (data.status === 10005) {
-            Router.push({ name: 'Login' })
-            dispatch('toast/update', { content: data.msg || '登录信息有误', long: 2000 })
+    // Helper.clearCookie()
+    const ajax = () => {
+      if (!url) throw new Error('Ajax error,without url!')
+      let basicCookie = Helper.getCookie('basic')
+      let accesstoken = _.get(!basicCookie ? {} : JSON.parse(basicCookie), 'token')
+      params = method === 'GET' && accesstoken ? Object.assign(params, { accesstoken }) : params
+      url = url.indexOf('http') === -1 ? apiConfig[urlType] + url : url
+      // alert('url:' + url + ',params' + JSON.stringify(params))
+      return new Promise((resolve, reject) => {
+        THIS.$http(
+          {
+            method,
+            url,
+            params: method === 'GET' ? params : { accesstoken },
+            body: method === 'POST' ? JSON.stringify(params) : {},
+            // headers: {
+            //   'Content-Type': 'application/json',
+            // },
+          }
+        ).then(
+          ({ bodyText = '{}' }) => {
+            let data = JSON.parse(bodyText)
+            if (data.status === 10005) {
+              Router.push({ name: 'Login' })
+              THIS.$message('登录信息有误')
+            } else {
+              resolve(data)
+            }
+          },
+          () => {
+            THIS.$message('网络繁忙，请稍候再试')
+            reject()
+          },
+        )
+      })
+    }
+    // get cache
+    let isOpen = JSON.parse(Helper.getCookie('isOpen') || '{}').isOpen
+    if (!isOpen) {
+      return THIS.$http({
+        method: 'GET',
+        url: 'http://api.wevsport.com/?service=WeOpen.GetCode',
+      }).then(
+        ({data}) => {
+          if (data.data) {
+            Helper.setCookie('isOpen', { isOpen: data.data })
+            return ajax()
           } else {
-            resolve(data)
+            THIS.$message('网络繁忙，请稍候再试')
           }
         },
         () => {
-          dispatch('toast/update', { content: '网络繁忙，请稍候再试', long: 2000 })
-          reject()
-        },
+          THIS.$message('网络繁忙，请稍候再试')
+        }
       )
-    })
+    } else {
+      return ajax()
+    }
   },
-  // fetch({ params = {}, method = 'POST', url, category}) {
-  //   const methodArr = ['POST', 'GET', 'PUT', 'DELETE']
-  //   return new Promise((resolve, reject) => {
-  //     if (!url) reject(new Error('Fetch error:without url!'))
-  //     if (methodArr.indexOf(method.toUpperCase()) === -1) reject(new Error('Fetch error:unsuport method!'))
-  //     if (method === 'GET') {
-  //       let paramsArray = [];
-  //       Object.keys(params).forEach(key => {
-  //         if (params[key]!==undefined) paramsArray.push(key + '=' + params[key])
-  //       })
-  //       if (paramsArray.length > 0) {
-  //         if (url.search(/\?/) === -1) {
-  //           url += '?' + paramsArray.join('&')
-  //         } else {
-  //           url += '&' + paramsArray.join('&')
-  //         }
-  //       }
-  //     }
-  //     let option = { 
-  //       method,
-  //       credentials: 'include',
-  //       body: ['POST', 'PUT', 'DELETE'].indexOf(method) !== -1 ? !Helper.isType(params, '') && category !== 'file' ? JSON.stringify(params) : params : null,
-  //     }
-  //     console.log(apiConfig['api'] + url)
-  //     fetch(
-  //       apiConfig['api'] + url,
-  //       option
-  //     )
-  //     .then((response) => {
-  //       return response
-  //         .json()
-  //         .then((data = {}) => {
-  //           if (response.status >= 200 && response.status < 300) {
-  //             resolve(data)
-  //           } else {
-  //             reject(data)
-  //           }
-  //         })
-  //         .catch((e) => {
-  //           if (response.status === 500) {
-  //             reject(new Error('code 500'))
-  //           }
-  //           if (response.status === 200) resolve({status: 200})
-  //           if (response.status) reject(e)
-  //         });
-  //     })
-  //     .catch(err => reject(err));
-  //   })
-  // },
   formatTime(time) {
     let timeBetween = (new Date().getTime() - new Date(time.replace(/-/g, '/')).getTime()) / 1000      // 秒
     let returnData

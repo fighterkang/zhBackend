@@ -133,13 +133,19 @@ div {
   font-size: 16px;
 }
 
+/*去掉input自动补全后的黄色样式*/  
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {  
+  -webkit-transition-delay: 99999s;  
+  -webkit-transition: color 99999s ease-out, background-color 99999s ease-out;
+}
+
 @font-face {
   font-family: 'iconfont';  /* project id 307577 */
-  src: url('//at.alicdn.com/t/font_307577_jfwcfd0p2b1brzfr.eot');
-  src: url('//at.alicdn.com/t/font_307577_jfwcfd0p2b1brzfr.eot?#iefix') format('embedded-opentype'),
-  url('//at.alicdn.com/t/font_307577_jfwcfd0p2b1brzfr.woff') format('woff'),
-  url('//at.alicdn.com/t/font_307577_jfwcfd0p2b1brzfr.ttf') format('truetype'),
-  url('//at.alicdn.com/t/font_307577_jfwcfd0p2b1brzfr.svg#iconfont') format('svg');
+  src: url('//at.alicdn.com/t/font_307577_f7xll9gui85b3xr.eot');
+  src: url('//at.alicdn.com/t/font_307577_f7xll9gui85b3xr.eot?#iefix') format('embedded-opentype'),
+  url('//at.alicdn.com/t/font_307577_f7xll9gui85b3xr.woff') format('woff'),
+  url('//at.alicdn.com/t/font_307577_f7xll9gui85b3xr.ttf') format('truetype'),
+  url('//at.alicdn.com/t/font_307577_f7xll9gui85b3xr.svg#iconfont') format('svg');
 }
 
 .iconfont {

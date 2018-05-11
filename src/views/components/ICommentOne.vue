@@ -74,11 +74,7 @@ export default {
         },
       }).then(
         ({data}) => {
-          // console.log(data)
-          // this.$Helper.message.toast({
-          //   text: '已点赞',
-          //   long: 2000,
-          // })
+          this.$message('已点赞')
         },
         () => {
           this.$message('点赞失败')
