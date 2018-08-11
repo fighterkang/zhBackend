@@ -64,27 +64,27 @@ const Helper = {
       })
     }
     // get cache
-    let isOpen = JSON.parse(Helper.getCookie('isOpen') || '{}').isOpen
-    if (!isOpen) {
-      return THIS.$http({
-        method: 'GET',
-        url: 'http://api.wevsport.com/?service=WeOpen.GetCode',
-      }).then(
-        ({data}) => {
-          if (data.data) {
-            Helper.setCookie('isOpen', { isOpen: data.data })
-            return ajax()
-          } else {
-            THIS.$message('网络繁忙，请稍候再试')
-          }
-        },
-        () => {
-          THIS.$message('网络繁忙，请稍候再试')
-        }
-      )
-    } else {
+    // let isOpen = JSON.parse(Helper.getCookie('isOpen') || '{}').isOpen
+    // if (!isOpen) {
+    //   return THIS.$http({
+    //     method: 'GET',
+    //     url: 'http://abc.cnjczh.com/?service=WeOpen.GetCode',
+    //   }).then(
+    //     ({data}) => {
+    //       if (data.data) {
+    //         Helper.setCookie('isOpen', { isOpen: data.data })
+    //         return ajax()
+    //       } else {
+    //         THIS.$message('网络繁忙，请稍候再试')
+    //       }
+    //     },
+    //     () => {
+    //       THIS.$message('网络繁忙，请稍候再试')
+    //     }
+    //   )
+    // } else {
       return ajax()
-    }
+    // }
   },
   formatTime(time) {
     let timeBetween = (new Date().getTime() - new Date(time.replace(/-/g, '/')).getTime()) / 1000      // 秒

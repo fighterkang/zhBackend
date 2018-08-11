@@ -166,6 +166,7 @@ export default {
       let returnData = {}
       for (let i in compositionConfig) {
         let composition = compositionConfig[i]
+        console.log(composition)
         let sub = composition.sub || [composition]
         let item = sub.filter(({name}) => name === this.$route.name)
         if (item.length > 0) {
@@ -433,6 +434,7 @@ export default {
       }
       this.$Helper.ajax({ url: this.selectApi,params: {},method: 'GET'}).then(
         (item) => {
+          debugger
           // save to cache
           this.$Helper.setCookie(this.selectApi, item)
           init(item)

@@ -14,6 +14,7 @@ export const levelConfig = {
       'ActivityLoop',
       'UserList',
       'HelpList',
+      'Classify',
     ],
   },
 }
@@ -136,6 +137,19 @@ export const compositionConfig = [
         api: 'manage/helpList',
         showList: ['id','name','userid', 'phone','question','resolveType', 'responseType'],
         // add: 'AddForumPost',
+      },
+    ]
+  },
+  {
+    name: '考试中心',
+    icon: '',
+    sub: [
+      {
+        name: 'Classify',
+        text: '分类',
+        icon: '&#xe63e;',
+        api: 'manage/examcenter/getOneClass',
+        showList: [],
       },
     ]
   },
